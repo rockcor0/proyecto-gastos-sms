@@ -9,11 +9,11 @@ struct MonthlyAchievementResult {
 }
 
 /// Computes achievements entirely on the fly from existing `Transaction` data — there is no
-/// "unlocked achievement" record in SwiftData. Simpler, and it can never drift out of sync with
-/// the transactions themselves. The tradeoff (accepted for now, see the GastosSMS
-/// monthly-navigation-and-achievements analysis): no persisted history of *when* something was
-/// first unlocked, so no "you just earned a new badge!" celebration moment is possible without
-/// adding that persistence later.
+/// "unlocked achievement" record in SwiftData, so this can never drift out of sync with the
+/// transactions themselves. The one thing a purely-computed result can't tell you is whether a
+/// tier was *just* reached or reached months ago — `newlyUnlocked(_:seen:)` below answers that
+/// using the separate `SeenAchievement` record (Fase 5), which exists only to gate the
+/// celebration moment, not to recompute points or badges.
 enum AchievementsEngine {
 
     /// Evaluates every calendar month from the earliest transaction through the current month
@@ -52,5 +52,20 @@ enum AchievementsEngine {
     /// Every tier reached in at least one month, for the badge list.
     static func unlockedTierIDs(_ results: [MonthlyAchievementResult]) -> Set<String> {
         Set(results.compactMap { $0.tier?.id })
+    }
+
+    private struct SeenKey: Hashable {
+        let year: Int
+        let month: Int
+        let tierID: String
+    }
+
+    /// Results with a tier that isn't yet recorded in `seen` — the ones to celebrate.
+    static func newlyUnlocked(_ results: [MonthlyAchievementResult], seen: [SeenAchievement]) -> [MonthlyAchievementResult] {
+        let seenKeys = Set(seen.map { SeenKey(year: $0.year, month: $0.month, tierID: $0.tierID) })
+        return results.filter { result in
+            guard let tier = result.tier else { return false }
+            return !seenKeys.contains(SeenKey(year: result.month.year, month: result.month.month, tierID: tier.id))
+        }
     }
 }

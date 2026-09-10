@@ -2,7 +2,12 @@ import SwiftUI
 import SwiftData
 
 struct AchievementsView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \Transaction.date) private var transactions: [Transaction]
+    @Query private var seenAchievements: [SeenAchievement]
+
+    @State private var newlyUnlocked: [MonthlyAchievementResult] = []
+    @State private var showCelebration = false
 
     private var results: [MonthlyAchievementResult] {
         AchievementsEngine.evaluate(transactions: transactions)
@@ -48,7 +53,30 @@ struct AchievementsView: View {
                 }
             }
             .navigationTitle("Logros")
+            .onAppear(perform: checkForNewAchievements)
+            .sheet(isPresented: $showCelebration) {
+                AchievementCelebrationView(achievements: newlyUnlocked) {
+                    showCelebration = false
+                }
+                .presentationDetents([.medium])
+            }
         }
+    }
+
+    /// Marks any tier reached since the last visit as seen (so it only celebrates once) and, if
+    /// there's anything new, queues it for `AchievementCelebrationView`.
+    private func checkForNewAchievements() {
+        let unlocked = AchievementsEngine.newlyUnlocked(results, seen: seenAchievements)
+        guard !unlocked.isEmpty else { return }
+
+        for result in unlocked {
+            guard let tier = result.tier else { continue }
+            modelContext.insert(SeenAchievement(year: result.month.year, month: result.month.month, tierID: tier.id))
+        }
+        try? modelContext.save()
+
+        newlyUnlocked = unlocked
+        showCelebration = true
     }
 
     private var pointsCard: some View {
@@ -116,7 +144,44 @@ struct AchievementsView: View {
     }
 }
 
+/// The celebration sheet shown the first time (and only the first time) a tier is reached —
+/// `AchievementsView.checkForNewAchievements` decides what goes in `achievements`.
+private struct AchievementCelebrationView: View {
+    let achievements: [MonthlyAchievementResult]
+    let dismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Text(achievements.count > 1 ? "¡Nuevos logros!" : "¡Nuevo logro!")
+                .font(.title2.bold())
+                .padding(.top, 24)
+
+            ForEach(achievements, id: \.month) { result in
+                if let tier = result.tier {
+                    VStack(spacing: 6) {
+                        Image(systemName: tier.systemImage)
+                            .font(.system(size: 44))
+                            .foregroundStyle(.yellow)
+                        Text(tier.title)
+                            .font(.headline)
+                        Text("\(result.month.displayName) · +\(tier.points) pts")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            Spacer()
+
+            Button("Genial", action: dismiss)
+                .buttonStyle(.borderedProminent)
+                .padding(.bottom, 24)
+        }
+        .padding(.horizontal)
+    }
+}
+
 #Preview {
     AchievementsView()
-        .modelContainer(for: [Transaction.self, CorrectionExample.self], inMemory: true)
+        .modelContainer(for: [Transaction.self, CorrectionExample.self, SeenAchievement.self], inMemory: true)
 }

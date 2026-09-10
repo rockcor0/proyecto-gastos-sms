@@ -7,6 +7,6 @@ struct GastosSMSApp: App {
         WindowGroup {
             RootTabView()
         }
-        .modelContainer(for: [Transaction.self, CorrectionExample.self])
+        .modelContainer(for: [Transaction.self, CorrectionExample.self, SeenAchievement.self])
     }
 }
