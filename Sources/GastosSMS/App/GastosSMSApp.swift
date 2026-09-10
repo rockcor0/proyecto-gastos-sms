@@ -5,7 +5,7 @@ import SwiftData
 struct GastosSMSApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootTabView()
         }
         .modelContainer(for: [Transaction.self, CorrectionExample.self])
     }

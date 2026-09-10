@@ -8,6 +8,19 @@ struct YearMonth: Hashable, Codable, Comparable {
     var year: Int
     var month: Int
 
+    init(year: Int, month: Int) {
+        self.year = year
+        self.month = month
+    }
+
+    /// The year+month containing `date`. Declared explicitly (alongside `init(year:month:)`)
+    /// because adding any custom initializer suppresses Swift's synthesized memberwise one.
+    init(date: Date, calendar: Calendar = .current) {
+        let components = calendar.dateComponents([.year, .month], from: date)
+        year = components.year ?? 1970
+        month = components.month ?? 1
+    }
+
     static func < (lhs: YearMonth, rhs: YearMonth) -> Bool {
         (lhs.year, lhs.month) < (rhs.year, rhs.month)
     }
