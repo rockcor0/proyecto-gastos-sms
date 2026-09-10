@@ -1,3 +1,13 @@
+.DS_Store
+
+# XcodeGen
+#
+# The Xcode project is generated from project.yml — do not commit it.
+# Run `xcodegen generate` after checkout or after editing project.yml.
+*.xcodeproj/
+DerivedData/
+Generated-Info.plist
+
 # Xcode
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
