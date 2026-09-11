@@ -25,6 +25,9 @@ struct GenerativeTransactionCandidate {
 
     @Guide(description: "Forma de pago mencionada, por ejemplo 'Tarjeta terminada en 1234' o 'Nequi'. Vacío si no se menciona.")
     var paymentMethod: String?
+
+    @Guide(description: "En qué se gastó el dinero, una de: Vivienda, Alimentación, Transporte, Entretenimiento, Educación, Salud, Deporte, Cuidado personal, Ropa, Streaming y suscripciones, Otros. Elige la que mejor encaje con el comercio o el contexto del mensaje; usa Otros si no es claro.")
+    var category: String
 }
 
 @available(iOS 26.0, *)
@@ -36,7 +39,8 @@ extension GenerativeTransactionCandidate {
     /// bug is in `merged(into:rawText:)`'s parsing instead.
     var fieldSummary: String {
         "banco: \(bank ?? "—") · tipo: \(movementType) · monto: \(amount ?? "—") · " +
-        "moneda: \(currency) · comercio: \(merchant ?? "—") · forma de pago: \(paymentMethod ?? "—")"
+        "moneda: \(currency) · comercio: \(merchant ?? "—") · forma de pago: \(paymentMethod ?? "—") · " +
+        "categoría: \(category)"
     }
 
     /// Fills only the fields `parsed` left empty — `SMSParsingEngine`'s own findings always win,
@@ -61,6 +65,9 @@ extension GenerativeTransactionCandidate {
         }
         if let mappedCurrency = Currency(rawValue: currency.lowercased()) {
             result.currency = mappedCurrency
+        }
+        if result.category == .otros, let mappedCategory = Category(displayName: category) {
+            result.category = mappedCategory
         }
 
         let merchantMatters = (result.type == .compra || result.type == .pago)

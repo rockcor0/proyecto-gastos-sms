@@ -11,6 +11,7 @@ struct CorrectionExampleSnapshot: Sendable {
     let currency: Currency
     let merchant: String?
     let paymentMethod: String?
+    let category: Category
 }
 
 /// The outcome of a `GenerativeExtractionService.refine` call — carries not just the merged
@@ -58,9 +59,11 @@ enum GenerativeExtractionService {
             billetera colombiana (por ejemplo Bancolombia, Davivienda, Nequi, Daviplata, BBVA). \
             Responde únicamente con lo que el mensaje menciona explícitamente. No inventes ni \
             calcules montos, comercios o bancos que no estén escritos en el texto — deja esos \
-            campos vacíos si no aparecen. Si se muestran ejemplos de mensajes anteriores del \
-            mismo banco, úsalos solo como guía de estilo y de qué campos suele traer ese banco, \
-            nunca copies sus valores en el mensaje nuevo.
+            campos vacíos si no aparecen. Para la categoría del gasto, sí puedes inferirla del \
+            comercio o del contexto aunque no esté escrita literalmente — usa Otros solo si de \
+            verdad no es claro. Si se muestran ejemplos de mensajes anteriores del mismo banco, \
+            úsalos solo como guía de estilo y de qué campos suele traer ese banco, nunca copies \
+            sus valores en el mensaje nuevo.
             """
         )
 
@@ -87,7 +90,7 @@ enum GenerativeExtractionService {
             Mensaje anterior del mismo banco: \(example.rawText)
             Resultado correcto — tipo: \(example.type.displayName), monto: \(example.amount), \
             moneda: \(example.currency.isoCode), comercio: \(example.merchant ?? "no aplica"), \
-            forma de pago: \(example.paymentMethod ?? "no aplica")
+            forma de pago: \(example.paymentMethod ?? "no aplica"), categoría: \(example.category.displayName)
             """
         }.joined(separator: "\n\n")
 

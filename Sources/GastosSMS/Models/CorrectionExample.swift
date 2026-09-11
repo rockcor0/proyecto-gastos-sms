@@ -17,6 +17,7 @@ final class CorrectionExample {
     var merchant: String?
     var paymentMethod: String?
     var createdAt: Date
+    var category: Category = Category.otros
 
     init(
         id: UUID = UUID(),
@@ -27,7 +28,8 @@ final class CorrectionExample {
         currency: Currency,
         merchant: String? = nil,
         paymentMethod: String? = nil,
-        createdAt: Date = .now
+        createdAt: Date = .now,
+        category: Category = .otros
     ) {
         self.id = id
         self.bank = bank
@@ -38,5 +40,6 @@ final class CorrectionExample {
         self.merchant = merchant
         self.paymentMethod = paymentMethod
         self.createdAt = createdAt
+        self.category = category
     }
 }

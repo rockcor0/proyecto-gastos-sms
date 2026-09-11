@@ -12,6 +12,9 @@ struct ParsedTransaction {
     var rawText: String
     var confidence: Double
     var missingFields: [String]
+    /// Always has a value — `.otros` is a valid, non-failing guess, so this never affects
+    /// `confidence`/`missingFields`/`needsReview` the way a missing amount or bank does.
+    var category: Category = .otros
 
     /// Low confidence or a missing amount both mean a human should confirm this before saving.
     var needsReview: Bool {

@@ -108,7 +108,8 @@ struct PasteSMSView: View {
                 amount: $0.amount,
                 currency: $0.currency,
                 merchant: $0.merchant,
-                paymentMethod: $0.paymentMethod
+                paymentMethod: $0.paymentMethod,
+                category: $0.category
             )
         }
     }

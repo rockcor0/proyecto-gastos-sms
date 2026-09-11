@@ -62,4 +62,30 @@ final class SMSParsingEngineTests: XCTestCase {
         XCTAssertEqual(parsed.type, .pago)
         XCTAssertEqual(parsed.amount, Decimal(string: "2119221.76"))
     }
+
+    /// Real SMS from Bancolombia using the English thousands-separator convention ("$1,000,000")
+    /// instead of the Colombian one ("$1.000.000") the other tests use. Regression test for the
+    /// amount regex/normalizeAmount fix and the "transferiste" keyword.
+    func testEnglishThousandsSeparatorAmountAndTransferisteAreDetected() {
+        let text = "Bancolombia: Transferiste $1,000,000 desde tu cuenta *9000 a la cuenta " +
+            "*81000005106 el 20/08/2026 a las 15:30. ¿Dudas? Llamanos al 018000931987. Estamos cerca."
+        let parsed = SMSParsingEngine.parse(text)
+
+        XCTAssertEqual(parsed.bank, "Bancolombia")
+        XCTAssertEqual(parsed.type, .transferenciaEnviada)
+        XCTAssertEqual(parsed.amount, Decimal(1_000_000))
+    }
+
+    func testMerchantKeywordDetectsCategory() {
+        let text = "Compra por $45.000 en RAPPI"
+        let parsed = SMSParsingEngine.parse(text)
+
+        XCTAssertEqual(parsed.category, .alimentacion)
+    }
+
+    func testUnknownMerchantFallsBackToOtrosCategory() {
+        let parsed = SMSParsingEngine.parse("Compra por $10.000 en Ferreteria El Tornillo")
+
+        XCTAssertEqual(parsed.category, .otros)
+    }
 }

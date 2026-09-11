@@ -70,6 +70,64 @@ enum Currency: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// What the money was spent on. `otros` is the mandatory fallback — every transaction gets a
+/// category, even when detection (rules or the generative model) can't tell which one.
+enum Category: String, Codable, CaseIterable, Identifiable {
+    case vivienda
+    case alimentacion
+    case transporte
+    case entretenimiento
+    case educacion
+    case salud
+    case deporte
+    case cuidadoPersonal
+    case ropa
+    case streamingSuscripciones
+    case otros
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .vivienda: return "Vivienda"
+        case .alimentacion: return "Alimentación"
+        case .transporte: return "Transporte"
+        case .entretenimiento: return "Entretenimiento"
+        case .educacion: return "Educación"
+        case .salud: return "Salud"
+        case .deporte: return "Deporte"
+        case .cuidadoPersonal: return "Cuidado personal"
+        case .ropa: return "Ropa"
+        case .streamingSuscripciones: return "Streaming y suscripciones"
+        case .otros: return "Otros"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .vivienda: return "house.fill"
+        case .alimentacion: return "fork.knife"
+        case .transporte: return "car.fill"
+        case .entretenimiento: return "theatermasks.fill"
+        case .educacion: return "graduationcap.fill"
+        case .salud: return "cross.case.fill"
+        case .deporte: return "figure.run"
+        case .cuidadoPersonal: return "sparkles"
+        case .ropa: return "tshirt.fill"
+        case .streamingSuscripciones: return "tv.fill"
+        case .otros: return "ellipsis.circle.fill"
+        }
+    }
+
+    /// Matches a free-text label (e.g. from a generative model's output) against `displayName`.
+    init?(displayName: String) {
+        guard let match = Category.allCases.first(where: {
+            $0.displayName.compare(displayName, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame
+        }) else { return nil }
+        self = match
+    }
+}
+
 /// How a transaction entered the app.
 enum CaptureSource: String, Codable, CaseIterable, Identifiable {
     case manual

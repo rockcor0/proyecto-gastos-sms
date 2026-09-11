@@ -10,6 +10,7 @@ struct TransactionDraft: Identifiable {
     var currency: Currency = .cop
     var merchant: String = ""
     var paymentMethod: String = ""
+    var category: Category = .otros
     var date: Date = .now
     var rawText: String? = nil
     var confidence: Double = 1.0
@@ -27,6 +28,7 @@ struct TransactionDraft: Identifiable {
         currency = parsed.currency
         merchant = parsed.merchant ?? ""
         paymentMethod = parsed.paymentMethod ?? ""
+        category = parsed.category
         date = parsed.date
         rawText = parsed.rawText
         confidence = parsed.confidence
@@ -40,6 +42,7 @@ struct TransactionDraft: Identifiable {
         currency = transaction.currency
         merchant = transaction.merchant ?? ""
         paymentMethod = transaction.paymentMethod ?? ""
+        category = transaction.category
         date = transaction.date
         rawText = transaction.rawText
         confidence = transaction.confidence
@@ -124,6 +127,11 @@ struct TransactionEditorView: View {
                             Text(type.displayName).tag(type)
                         }
                     }
+                    Picker("Categoría", selection: $draft.category) {
+                        ForEach(Category.allCases) { category in
+                            Label(category.displayName, systemImage: category.systemImage).tag(category)
+                        }
+                    }
                     DatePicker("Fecha", selection: $draft.date, displayedComponents: [.date, .hourAndMinute])
                 }
 
@@ -184,7 +192,8 @@ struct TransactionEditorView: View {
                 rawText: draft.rawText,
                 confidence: draft.confidence,
                 source: draft.source,
-                needsReview: draft.confidence < 0.75
+                needsReview: draft.confidence < 0.75,
+                category: draft.category
             )
             modelContext.insert(transaction)
         case .edit(let transaction):
@@ -196,6 +205,7 @@ struct TransactionEditorView: View {
             transaction.paymentMethod = draft.paymentMethod.isEmpty ? nil : draft.paymentMethod
             transaction.date = draft.date
             transaction.needsReview = false
+            transaction.category = draft.category
         }
 
         recordCorrectionExampleIfNeeded(amount: amount)
@@ -225,7 +235,8 @@ struct TransactionEditorView: View {
             amount: amount,
             currency: draft.currency,
             merchant: draft.merchant.isEmpty ? nil : draft.merchant,
-            paymentMethod: draft.paymentMethod.isEmpty ? nil : draft.paymentMethod
+            paymentMethod: draft.paymentMethod.isEmpty ? nil : draft.paymentMethod,
+            category: draft.category
         )
         modelContext.insert(example)
     }

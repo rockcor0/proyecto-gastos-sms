@@ -15,7 +15,10 @@ struct TransactionRowView: View {
                 HStack(spacing: 4) {
                     if let bank = transaction.bank {
                         Text(bank)
+                        Text("·")
                     }
+                    Text(transaction.category.displayName)
+                    Text("·")
                     Text(transaction.date, style: .date)
                 }
                 .font(.caption)
