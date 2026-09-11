@@ -1,5 +1,5 @@
 import XCTest
-@testable import GastosSMS
+@testable import Mecateando
 
 final class SMSParsingEngineTests: XCTestCase {
 

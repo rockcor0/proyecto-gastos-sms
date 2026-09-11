@@ -1,7 +1,7 @@
 import XCTest
-@testable import GastosSMS
+@testable import Mecateando
 
-final class GastosSMSTests: XCTestCase {
+final class SmokeTests: XCTestCase {
     func testExample() throws {
         XCTAssertTrue(true)
     }

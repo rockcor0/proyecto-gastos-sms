@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct GastosSMSApp: App {
+struct MecateandoApp: App {
     var body: some Scene {
         WindowGroup {
             RootTabView()
