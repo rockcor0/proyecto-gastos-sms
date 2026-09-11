@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// The kind of financial movement described by a transaction.
 enum MovementType: String, Codable, CaseIterable, Identifiable {
@@ -116,6 +117,27 @@ enum Category: String, Codable, CaseIterable, Identifiable {
         case .ropa: return "tshirt.fill"
         case .streamingSuscripciones: return "tv.fill"
         case .otros: return "ellipsis.circle.fill"
+        }
+    }
+
+    /// One fixed color per category — used everywhere a category shows up (row icons, chart
+    /// segments, the category breakdown list) so the same color always means the same category.
+    /// Matches the palette given by the user 1:1 in declaration order; `otros` isn't in that
+    /// 10-color palette (there are 10 real categories + the fallback), so it gets a neutral gray
+    /// instead of stealing one of the vivid colors from a real category.
+    var color: Color {
+        switch self {
+        case .vivienda: return Color(hex: "00C2CB")
+        case .alimentacion: return Color(hex: "7FE0D4")
+        case .transporte: return Color(hex: "FFE38A")
+        case .entretenimiento: return Color(hex: "FF9A76")
+        case .educacion: return Color(hex: "FF5D8F")
+        case .salud: return Color(hex: "FFCF9C")
+        case .deporte: return Color(hex: "FF8C6B")
+        case .cuidadoPersonal: return Color(hex: "E8543F")
+        case .ropa: return Color(hex: "7C3F82")
+        case .streamingSuscripciones: return Color(hex: "2C2153")
+        case .otros: return Color(hex: "8E8E93")
         }
     }
 

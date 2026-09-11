@@ -15,6 +15,7 @@ struct TransactionRowView: View {
 
                 HStack(spacing: 4) {
                     Image(systemName: transaction.category.systemImage)
+                        .foregroundStyle(transaction.category.color)
                         .accessibilityLabel(transaction.category.displayName)
                     if let bank = transaction.bank {
                         Text(bank)

@@ -77,6 +77,9 @@ struct MetricsView: View {
         .padding(.vertical, 4)
     }
 
+    /// Each slice uses `Category.color` directly (not Charts' auto-assigned `foregroundStyle(by:)`
+    /// palette), so a category is always the same color here and in `categoryBreakdownList`/the
+    /// row icons in `ContentView`.
     private var categoryChart: some View {
         Chart(categoryTotals, id: \.category) { entry in
             SectorMark(
@@ -84,17 +87,21 @@ struct MetricsView: View {
                 innerRadius: .ratio(0.6),
                 angularInset: 1.5
             )
-            .foregroundStyle(by: .value("Categoría", entry.category.displayName))
+            .foregroundStyle(entry.category.color)
             .cornerRadius(4)
         }
         .frame(height: 200)
         .padding(.vertical, 4)
     }
 
+    /// Doubles as the donut chart's legend — Charts doesn't draw one for a manually-colored
+    /// `foregroundStyle`, so this list (with matching colors) stands in for it.
     private var categoryBreakdownList: some View {
         ForEach(categoryTotals, id: \.category) { entry in
             HStack {
-                Label(entry.category.displayName, systemImage: entry.category.systemImage)
+                Image(systemName: entry.category.systemImage)
+                    .foregroundStyle(entry.category.color)
+                Text(entry.category.displayName)
                 Spacer()
                 Text(CurrencyFormatting.string(for: entry.total, currency: .cop))
                     .foregroundStyle(.secondary)
