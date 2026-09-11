@@ -40,26 +40,34 @@ struct YearMonth: Hashable, Codable, Comparable {
 
     /// The date range covering this calendar month, for filtering transactions by `date`.
     func dateInterval(calendar: Calendar = .current) -> DateInterval {
-        var components = DateComponents()
-        components.year = year
-        components.month = month
-        components.day = 1
-        let start = calendar.date(from: components) ?? .now
+        let start = firstDay(calendar: calendar)
         let end = calendar.date(byAdding: .month, value: 1, to: start) ?? start
         return DateInterval(start: start, end: end)
     }
 
-    /// e.g. "Septiembre 2026".
-    var displayName: String {
+    /// A `Date` for the 1st of this month, in `calendar` — used only to hand off to
+    /// `DateFormatter`/`Calendar` APIs that want a real `Date`, never stored or compared.
+    private func firstDay(calendar: Calendar = .current) -> Date {
         var components = DateComponents()
         components.year = year
         components.month = month
         components.day = 1
-        let date = Calendar.current.date(from: components) ?? .now
+        return calendar.date(from: components) ?? .now
+    }
 
+    /// e.g. "Septiembre 2026".
+    var displayName: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "es_CO")
         formatter.dateFormat = "LLLL yyyy"
-        return formatter.string(from: date).capitalized
+        return formatter.string(from: firstDay()).capitalized
+    }
+
+    /// e.g. "sep 26" — short enough for a chart axis label.
+    var shortDisplayName: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_CO")
+        formatter.dateFormat = "MMM yy"
+        return formatter.string(from: firstDay()).capitalized
     }
 }

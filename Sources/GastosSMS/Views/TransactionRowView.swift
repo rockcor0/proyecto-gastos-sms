@@ -12,17 +12,20 @@ struct TransactionRowView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(transaction.merchant ?? transaction.type.displayName)
                     .font(.body)
+
                 HStack(spacing: 4) {
+                    Image(systemName: transaction.category.systemImage)
+                        .accessibilityLabel(transaction.category.displayName)
                     if let bank = transaction.bank {
                         Text(bank)
-                        Text("·")
                     }
-                    Text(transaction.category.displayName)
-                    Text("·")
-                    Text(transaction.date, style: .date)
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+                Text(shortDate)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
@@ -39,5 +42,13 @@ struct TransactionRowView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    /// e.g. "10 Sep 2026" — compact enough to sit next to bank and category on one line.
+    private var shortDate: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_CO")
+        formatter.dateFormat = "d MMM yyyy"
+        return formatter.string(from: transaction.date).capitalized
     }
 }

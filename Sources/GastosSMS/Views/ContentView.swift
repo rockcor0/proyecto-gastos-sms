@@ -17,17 +17,12 @@ struct ContentView: View {
     }
 
     private var monthlyTotal: Decimal {
-        selectedMonthTransactions
-            .filter { $0.type.isExpense }
-            .reduce(Decimal.zero) { $0 + $1.amount }
+        MonthlyTotals.expenseTotal(for: selectedMonth, in: transactions)
     }
 
     /// 0 if there are no transactions in the previous month, per the product spec.
     private var previousMonthTotal: Decimal {
-        let interval = selectedMonth.previous.dateInterval()
-        return transactions
-            .filter { interval.contains($0.date) && $0.type.isExpense }
-            .reduce(Decimal.zero) { $0 + $1.amount }
+        MonthlyTotals.expenseTotal(for: selectedMonth.previous, in: transactions)
     }
 
     private var spendingTrend: SpendingTrend {
@@ -113,30 +108,7 @@ struct ContentView: View {
 
     private var summaryCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Button {
-                    selectedMonth = selectedMonth.previous
-                } label: {
-                    Image(systemName: "chevron.left")
-                }
-                .buttonStyle(.plain)
-
-                Spacer()
-
-                Text(selectedMonth.displayName)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-
-                Button {
-                    selectedMonth = selectedMonth.next
-                } label: {
-                    Image(systemName: "chevron.right")
-                }
-                .buttonStyle(.plain)
-                .disabled(selectedMonth >= .current)
-            }
+            MonthNavigationBar(selectedMonth: $selectedMonth)
 
             Text(CurrencyFormatting.string(for: monthlyTotal, currency: .cop))
                 .font(.largeTitle)

@@ -24,19 +24,14 @@ enum AchievementsEngine {
             return []
         }
 
-        func total(for month: YearMonth) -> Decimal {
-            let interval = month.dateInterval()
-            return transactions
-                .filter { interval.contains($0.date) && $0.type.isExpense }
-                .reduce(Decimal.zero) { $0 + $1.amount }
-        }
-
         var results: [MonthlyAchievementResult] = []
         var month = earliest
         let latest = YearMonth.current
 
         while month <= latest {
-            let trend = SpendingTrend(currentTotal: total(for: month), previousTotal: total(for: month.previous))
+            let currentTotal = MonthlyTotals.expenseTotal(for: month, in: transactions)
+            let previousTotal = MonthlyTotals.expenseTotal(for: month.previous, in: transactions)
+            let trend = SpendingTrend(currentTotal: currentTotal, previousTotal: previousTotal)
             let tier = trend.direction == .better ? AchievementCatalog.tier(for: trend.difference) : nil
             results.append(MonthlyAchievementResult(month: month, trend: trend, tier: tier))
             month = month.next
