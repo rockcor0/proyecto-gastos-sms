@@ -5,6 +5,7 @@ import FoundationModels
 
 struct PasteSMSView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
     @State private var parsedDraft: TransactionDraft?
     @State private var isAnalyzing = false
@@ -50,8 +51,13 @@ struct PasteSMSView: View {
             .padding()
             .navigationTitle("Pegar mensaje de SMS")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancelar") { dismiss() }
+                }
+            }
             .sheet(item: $parsedDraft) { draft in
-                TransactionEditorView(mode: .create(draft: draft))
+                TransactionEditorView(mode: .create(draft: draft), onSaved: { dismiss() })
             }
         }
     }

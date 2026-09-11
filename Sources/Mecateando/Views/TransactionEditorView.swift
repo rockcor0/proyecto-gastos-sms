@@ -83,12 +83,17 @@ struct TransactionEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     let mode: TransactionEditorMode
+    /// Called after a successful save, before this view dismisses itself. `PasteSMSView` uses
+    /// this to also dismiss *itself* once the transaction it produced is saved — otherwise it
+    /// stays open underneath with no obvious way to close it (see `PasteSMSView`'s doc comment).
+    var onSaved: (() -> Void)?
     @State private var draft: TransactionDraft
     @State private var showSaveError = false
     @State private var saveErrorMessage = ""
 
-    init(mode: TransactionEditorMode) {
+    init(mode: TransactionEditorMode, onSaved: (() -> Void)? = nil) {
         self.mode = mode
+        self.onSaved = onSaved
         switch mode {
         case .create(let draft):
             _draft = State(initialValue: draft)
@@ -212,6 +217,7 @@ struct TransactionEditorView: View {
 
         do {
             try modelContext.save()
+            onSaved?()
             dismiss()
         } catch {
             saveErrorMessage = "No se pudo guardar el movimiento. Vuelve a intentarlo."
