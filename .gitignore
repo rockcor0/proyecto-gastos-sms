@@ -7,6 +7,8 @@
 *.xcodeproj/
 DerivedData/
 Generated-Info.plist
+Generated-ShareExtension-Info.plist
+*.entitlements
 
 # Xcode
 #

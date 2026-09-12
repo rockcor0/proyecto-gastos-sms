@@ -17,6 +17,7 @@ targets:
       - path: Sources/Mecateando
       - path: Sources/Mecateando/Preview Content
         buildPhase: resources
+      - path: Sources/Shared
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ridel007.gastossms
@@ -25,6 +26,11 @@ targets:
         DEVELOPMENT_ASSET_PATHS: "\"Sources/Mecateando/Preview Content\""
         ENABLE_PREVIEWS: YES
         TARGETED_DEVICE_FAMILY: "1,2"
+    entitlements:
+      path: Mecateando.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.ridel007.gastossms
     info:
       path: Generated-Info.plist
       properties:
@@ -32,6 +38,9 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+    dependencies:
+      - target: ShareExtension
+        embed: true
     testTargets:
       - name: MecateandoTests
         type: bundle.unit-test
@@ -40,3 +49,29 @@ targets:
           - path: Tests/MecateandoTests
         dependencies:
           - target: Mecateando
+
+  ShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Sources/ShareExtension
+      - path: Sources/Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ridel007.gastossms.ShareExtension
+        TARGETED_DEVICE_FAMILY: "1,2"
+    entitlements:
+      path: ShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.ridel007.gastossms
+    info:
+      path: Generated-ShareExtension-Info.plist
+      properties:
+        CFBundleDisplayName: Mecateando
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsText: true

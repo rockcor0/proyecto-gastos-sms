@@ -166,7 +166,14 @@ struct TransactionEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { dismiss() }
+                    Button("Cancelar") {
+                        // Editing mutates the live `Transaction` object directly (see
+                        // `saveAndDismiss`'s `.edit` branch) before `save()` is attempted, so a
+                        // cancel without a rollback would leave that in-memory mutation visible
+                        // in the list even though nothing was persisted.
+                        modelContext.rollback()
+                        dismiss()
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Guardar") { saveAndDismiss() }
@@ -220,7 +227,11 @@ struct TransactionEditorView: View {
             onSaved?()
             dismiss()
         } catch {
-            saveErrorMessage = "No se pudo guardar el movimiento. Vuelve a intentarlo."
+            // Undo the in-memory mutation/insert above so a failed save doesn't leave stale
+            // data visible (e.g. the list showing an amount that was never actually persisted).
+            modelContext.rollback()
+            print("⚠️ Transaction save failed: \(error)")
+            saveErrorMessage = "No se pudo guardar el movimiento: \(error.localizedDescription)"
             showSaveError = true
         }
     }
@@ -257,7 +268,9 @@ struct TransactionEditorView: View {
             try modelContext.save()
             dismiss()
         } catch {
-            saveErrorMessage = "No se pudo eliminar el movimiento. Vuelve a intentarlo."
+            modelContext.rollback()
+            print("⚠️ Transaction delete failed: \(error)")
+            saveErrorMessage = "No se pudo eliminar el movimiento: \(error.localizedDescription)"
             showSaveError = true
         }
     }
